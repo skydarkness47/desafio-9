@@ -6,11 +6,11 @@ const port = 8080
 var router = express.Router();
 
 
-//middleware
 app.use(express.urlencoded({extended:true}));
-
-//uso del metodo get
-app.get('/productos/',(req,res) =>{
+app.get("/api", (req,res) => {
+    
+})
+app.get('/api/productos/',(req,res) =>{
     let archivo = new Archivo("productos.txt")
     let dato;
     let arr;
@@ -20,12 +20,11 @@ app.get('/productos/',(req,res) =>{
     dato.forEach(element => {
         arr.push(element)
     });
-    let response = { "items": arr, "cantidad":arr.length -1 }
+    let response = { "items": arr, "cantidad":arr.length }
     res.json(response)
 
    
 } )
-
 app.put('/productos/actualizar/:id',(req,res) =>{
     let id = parseInt(req.params.id);
     console.log(id)
@@ -58,6 +57,8 @@ app.put('/productos/actualizar/:id',(req,res) =>{
     res.send(JSON.stringify(item))
    
 } )
+
+
  app.put('/api/productos/borrar/:id',(req,res) =>{
     let id = parseInt(req.params.id);
     console.log(id)
@@ -79,7 +80,7 @@ app.put('/productos/actualizar/:id',(req,res) =>{
                 "eror":"producto no encontrado"
            }
         
-    }s
+    }
     
     });
     let response = { "item borrado": item  }
@@ -88,28 +89,28 @@ app.put('/productos/actualizar/:id',(req,res) =>{
 
 
 
-app.get('/productos/:id',(req,res) =>{
-    let id = parseInt(req.params.id);
-    let archivo = new Archivo("productos.txt")
-    let dato
-    let id2
-    let item
-    let data = archivo.leer()
-    let bandera = 0
-    dato = JSON.parse(data)
+app.get('/api/productos/:id',(req,res) =>{
+        let id = parseInt(req.params.id);
+        let archivo = new Archivo("productos.txt")
+        let dato
+        let id2
+        let item
+        let data = archivo.leer()
+        let bandera = 0
+        dato = JSON.parse(data)
 
-    dato.forEach(element => {
-        id2 = element.id
-    if(id == id2){
-        bandera = 1;
-        item = element
-        console.log(item)
-    }else if(bandera == 0)
-        item =  
-           {
-                "eror":"producto no encontrado"
-           }
-        
+        dato.forEach(element => {
+            id2 = element.id
+        if(id == id2){
+            bandera = 1;
+            item = element
+            console.log(item)
+        }else if(bandera == 0)
+            item =  
+            {
+                    "eror":"producto no encontrado"
+            }
+            
     
     });
     console.log(item)
@@ -118,37 +119,48 @@ app.get('/productos/:id',(req,res) =>{
    
 } )
 
-app.post('/productos/guardar',(req,res) =>{
-    let archivo = new Archivo("productos.txt")
-    let datos = [] as any;
-    let index = 0;
-    let barrido;
-    console.log(req.body)
-    if(archivo.existe()){
-        barrido = JSON.parse(fs.readFileSync(`./productos.txt`,'utf8'))
-        barrido.push({
-           'id': barrido.length +1 ,
-          'title': req.query.title,
-          "Precio": req.query.precio,
-          "Tumbnail":req.query.thumbnail
-        })
-    }else{
-        barrido = []
-        barrido.push({
+app.post('/api/productos/guardar',(req,res) =>{
+        
+        let archivo = new Archivo("productos.txt")
+        let requerimiento;
+        let index = 0;
+        let barrido;
+        if(req.body.precio === undefined)
+        {   
+            console.log(req.query)
+            requerimiento = req.query;
+        }
+        else
+        {
+            console.log("holis")
+            requerimiento = req.body;
+        }
+        if(archivo.existe()){
+            barrido = JSON.parse(fs.readFileSync(`./productos.txt`,'utf8'))
+            barrido.push({
             'id': barrido.length +1 ,
-           'title': req.query.title,
-           "Precio": req.query.precio,
-           "Tumbnail":req.query.thumbnail
-         })
-    }
+            
+            'title': requerimiento.titulo,
+            "Precio": requerimiento.precio,
+            "Tumbnail":requerimiento.thum
+            })
+        }else{
+            barrido = []
+            barrido.push({
+                'id': barrido.length +1 ,
+            'title': requerimiento.titulo,
+            "Precio": requerimiento.precio,
+            "Tumbnail":requerimiento.thum
+            })
+     }
  
-  archivo.escribir(barrido)
-  res.json(barrido[barrido.length -1])
+    archivo.escribir(barrido)
+    res.json(barrido[barrido.length])
 } )
+
 
 app.use('/api',router);
 app.use(express.static('public'))
-
 app.listen(port, () =>{
     console.log("Server levantado")
 })
